@@ -156,7 +156,11 @@ var _ = { };
   // Note: you will nead to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
     return _.map(collection, function(value) {
-      functionOrKey.apply(value, args);
+        if(typeof(functionOrKey) == 'function') {
+          return functionOrKey.apply(value, collection)
+        } else {
+          return value[functionOrKey].apply(value,collection)
+        };
     });
   };
 
@@ -244,14 +248,14 @@ var _ = { };
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
-/* 
-    _.each(obj, function(obj2) {
-      for(var key in obj2) {
-        obj[key] = obj2[key];
+    _.each(Array.prototype.slice.call(arguments,1), function(source) {
+      for(var key in source) {
+        obj[key] = source[key];
       };
-    })
-    return arguments[0];
-*/
+    });
+  return obj;
+  };
+/*
     for(var i = 1; i < arguments.length; i++) {
       for(var key in arguments[i]) {
         arguments[0][key] = arguments[i][key];
@@ -259,10 +263,20 @@ var _ = { };
     };
     return arguments[0];
   };
-
+*/
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    _.each(Array.prototype.slice.call(arguments,1), function(source) {
+      for(var key in source) {
+        if (obj.hasOwnProperty(key) !== true) {
+          obj[key] = source[key];
+        }
+      }
+    });
+    return obj;
+  };
+/*
     for(var i = 1; i < arguments.length; i++) {
       for(var key in arguments[i]) {
         if( obj.hasOwnProperty(key) !== true) {
@@ -272,7 +286,7 @@ var _ = { };
     };
     return arguments[0];
   };
-
+*/
 
   /**
    * FUNCTIONS
@@ -312,6 +326,15 @@ var _ = { };
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var memo = {};
+    return function() {
+      if(_.contains(memo, memo[func])) {
+        return memo[func];
+      } else {
+        memo[func] = func.apply(this, arguments);
+        return memo.func;
+      };
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
