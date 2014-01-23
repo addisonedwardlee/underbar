@@ -128,9 +128,9 @@ var _ = { };
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
     var result = [];
-    for(var i = 0; i < array.length; i++) {
-      result.push(iterator(array[i]));
-    };
+    _.each(array, function(value, i, collection) {
+      result.push(iterator(value,i,collection));
+    });
     return result;
   };
 
@@ -178,6 +178,12 @@ var _ = { };
   //     return total + number;
   //   }, 0); // should be 6
   _.reduce = function(collection, iterator, accumulator) {    
+    _.each(collection, function(value, i, collection) {
+      accumulator = iterator(accumulator, value);
+    })
+    return accumulator;
+  };
+/*
     var previousValue = accumulator;
     if(Array.isArray(collection)) {
       for(var i = 0; i < collection.length; i++) {
@@ -190,7 +196,7 @@ var _ = { };
     };
     return previousValue;
   };
-
+*/
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
@@ -206,13 +212,13 @@ var _ = { };
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
-    iterator || (iterator = _.identity);
+    iterator = iterator || _.identity;
     if (collection.length < 1) {
       return true;
     } else {
-      return (_.reduce(collection, function(matches, item) {
-        return matches + iterator(item)
-      }, false)) == collection.length;
+      return !!(_.reduce(collection, function(matches, item) {
+        return matches && iterator(item);
+      }, true));
     };
   };
   // Determine whether any of the elements pass a truth test. If no iterator is
@@ -223,9 +229,9 @@ var _ = { };
     if (collection.length < 1) {
       return false;
     } else {
-      return (_.reduce(collection, function(matches, item) {
-        return matches + iterator(item)
-      }, false)) > 0;
+      return !!(_.reduce(collection, function(matches, item) {
+        return matches || iterator(item)
+      }, false));
     };
   };
 
