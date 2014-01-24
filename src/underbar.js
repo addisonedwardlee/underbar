@@ -333,14 +333,12 @@ var _ = { };
   // instead if possible.
   _.memoize = function(func) {
     var memo = {};
-    return function() {
-      if(_.contains(memo, memo[func])) {
-        return memo[func];
-      } else {
-        memo[func] = func.apply(this, arguments);
-        return memo.func;
+    return function(value) {
+      if(memo[func(value)] === undefined) {
+        memo[func(value)] = func.apply(value, arguments);
       };
-    };
+      return memo[func(value)];
+    }
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -366,6 +364,15 @@ var _ = { };
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    var oldArray = array.slice(0);
+    var newArray = [];
+    var randomIndex;
+    for(var i = 0; i < array.length; i++) {
+      randomIndex = Math.floor(Math.random() * oldArray.length);
+      newArray.push(oldArray[randomIndex]);
+      oldArray.splice(randomIndex, 1);
+    };
+    return newArray;
   };
 
 
@@ -388,6 +395,7 @@ var _ = { };
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
